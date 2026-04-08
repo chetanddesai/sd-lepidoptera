@@ -4,12 +4,14 @@
   const IMAGE_CACHE_KEY = "sd-lep-img-cache-v2";
   const INAT_API = "https://api.inaturalist.org/v1/taxa";
   const CONCURRENT_FETCHES = 4;
+  const CITY_STORAGE_KEY = "sd-lep-city";
 
   let imageCache = loadImageCache();
   let fetchQueue = [];
   let activeFetches = 0;
   let currentFilter = "all";
   let currentSearch = "";
+  let currentCity = loadCityPref();
 
   function loadImageCache() {
     try {
@@ -23,6 +25,18 @@
     try {
       localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify(imageCache));
     } catch { /* storage full — ignore */ }
+  }
+
+  function loadCityPref() {
+    try {
+      const saved = localStorage.getItem(CITY_STORAGE_KEY);
+      if (saved && LOCATIONS.some(l => l.id === saved)) return saved;
+    } catch { /* ignore */ }
+    return "poway";
+  }
+
+  function saveCityPref(cityId) {
+    try { localStorage.setItem(CITY_STORAGE_KEY, cityId); } catch { /* ignore */ }
   }
 
   // Butterfly SVG placeholder
@@ -39,10 +53,50 @@
   const ICONS = {
     wingspan: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 12l4-4M2 12l4 4M22 12l-4-4M22 12l-4 4"/></svg>`,
     calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-    habitat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c-4-3-8-7.5-8-12a8 8 0 1 1 16 0c0 4.5-4 9-8 12z"/><circle cx="12" cy="10" r="3"/></svg>`
+    habitat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c-4-3-8-7.5-8-12a8 8 0 1 1 16 0c0 4.5-4 9-8 12z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    pin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c-4-3-8-7.5-8-12a8 8 0 1 1 16 0c0 4.5-4 9-8 12z"/><circle cx="12" cy="10" r="3"/></svg>`
   };
 
+  // ============ LOCATION HELPERS ============
+
+  function getCityData() {
+    return LOCATION_DATA[currentCity] || {};
+  }
+
+  function getCityInfo() {
+    return LOCATIONS.find(l => l.id === currentCity) || LOCATIONS[0];
+  }
+
+  function getLikelihood(scientificName) {
+    const cityData = getCityData();
+    const count = cityData[scientificName];
+    if (!count) return "not-recorded";
+    if (count >= 5) return "common";
+    return "occasional";
+  }
+
+  function getLikelihoodLabel(likelihood) {
+    switch (likelihood) {
+      case "common": return "Recorded here";
+      case "occasional": return "Few records";
+      case "not-recorded": return "Not recorded";
+    }
+  }
+
+  function getObsCount(scientificName) {
+    return getCityData()[scientificName] || 0;
+  }
+
   // ============ RENDER ============
+
+  function renderCitySelector() {
+    const select = document.getElementById("city-select");
+    select.innerHTML =
+      `<option value="all-county">All San Diego County</option>` +
+      LOCATIONS.map(l =>
+        `<option value="${l.id}"${l.id === currentCity ? " selected" : ""}>${l.name}</option>`
+      ).join("");
+  }
 
   function renderFamilyLinks() {
     const container = document.getElementById("family-links");
@@ -53,7 +107,22 @@
 
   function renderContent() {
     const main = document.getElementById("main-content");
-    main.innerHTML = FAMILIES.map(renderFamily).join("");
+    main.innerHTML = renderCityNote() + FAMILIES.map(renderFamily).join("");
+  }
+
+  function renderCityNote() {
+    if (currentCity === "all-county") return "";
+    const info = getCityInfo();
+    const cityData = getCityData();
+    const recorded = Object.keys(cityData).length;
+    return `
+      <div class="city-habitat-note" id="city-note">
+        ${ICONS.pin}
+        <span>
+          Showing observations for <strong>${info.name}</strong> — ${info.habitat}.
+          <span class="city-stats">${recorded} species</span> recorded by iNaturalist community scientists.
+        </span>
+      </div>`;
   }
 
   function renderFamily(family) {
@@ -88,12 +157,18 @@
     if (sp.protected) badges.push(`<span class="badge badge-protected">Protected</span>`);
     if (sp.rare) badges.push(`<span class="badge badge-rare">Rare</span>`);
 
+    const likelihood = currentCity !== "all-county" ? getLikelihood(sp.scientificName) : null;
+    const obsCount = getObsCount(sp.scientificName);
+    const dimmed = likelihood === "not-recorded" ? " dimmed" : "";
+
     return `
-      <article class="species-card" id="${cardId}"
+      <article class="species-card${dimmed}" id="${cardId}"
         data-common="${sp.commonName.toLowerCase()}"
         data-scientific="${sp.scientificName.toLowerCase()}"
+        data-species-name="${sp.scientificName}"
         data-family="${family.id}"
-        data-rare="${sp.rare}" data-protected="${sp.protected}">
+        data-rare="${sp.rare}" data-protected="${sp.protected}"
+        data-likelihood="${likelihood || "all"}">
         <div class="card-image-wrap">
           <div class="image-placeholder loading" id="ph-${cardId}">
             ${BUTTERFLY_SVG}
@@ -101,6 +176,7 @@
           </div>
           <img alt="${sp.commonName} (${sp.scientificName})" data-species="${sp.scientificName}">
           ${badges.length ? `<div class="card-badges">${badges.join("")}</div>` : ""}
+          ${likelihood ? `<span class="likelihood-badge ${likelihood}" title="${obsCount} observation${obsCount !== 1 ? "s" : ""} in ${getCityInfo().name}">${getLikelihoodLabel(likelihood)}</span>` : ""}
         </div>
         <div class="card-body">
           <h4>${sp.commonName}</h4>
@@ -110,6 +186,7 @@
             ${sp.wingspan ? `<span class="meta-tag">${ICONS.wingspan}${sp.wingspan}</span>` : ""}
             ${sp.flight ? `<span class="meta-tag">${ICONS.calendar}${sp.flight}</span>` : ""}
             ${sp.habitat ? `<span class="meta-tag">${ICONS.habitat}${sp.habitat}</span>` : ""}
+            ${likelihood && obsCount > 0 ? `<span class="meta-tag">${ICONS.pin}${obsCount} obs in ${getCityInfo().name}</span>` : ""}
           </div>
         </div>
       </article>`;
@@ -164,7 +241,6 @@
     const species = img.dataset.species;
     const cardId = toId(species);
 
-    // Try genus + species first (first two words)
     const searchName = species.split(" ").slice(0, 2).join(" ");
 
     try {
@@ -204,7 +280,6 @@
     img.onerror = () => showPlaceholder(cardId, false);
     img.src = photoData.url;
 
-    // Add credit
     const wrap = img.closest(".card-image-wrap");
     if (wrap && photoData.attribution) {
       let credit = wrap.querySelector(".image-credit");
@@ -243,13 +318,13 @@
       let matchesFilter = true;
       if (currentFilter === "protected") matchesFilter = card.dataset.protected === "true";
       if (currentFilter === "rare") matchesFilter = card.dataset.rare === "true";
+      if (currentFilter === "recorded") matchesFilter = card.dataset.likelihood === "common" || card.dataset.likelihood === "occasional";
 
       const visible = matchesSearch && matchesFilter;
       card.classList.toggle("hidden", !visible);
       if (visible) visibleCount++;
     });
 
-    // Show/hide subfamily and family sections based on visible children
     document.querySelectorAll(".subfamily-section").forEach(sub => {
       const hasVisible = sub.querySelector(".species-card:not(.hidden)");
       sub.style.display = hasVisible ? "" : "none";
@@ -260,7 +335,6 @@
       fam.style.display = hasVisible ? "" : "none";
     });
 
-    // Show no-results message
     let noResults = document.querySelector(".no-results");
     if (visibleCount === 0) {
       if (!noResults) {
@@ -272,6 +346,28 @@
       noResults.style.display = "";
     } else if (noResults) {
       noResults.style.display = "none";
+    }
+  }
+
+  // ============ CITY CHANGE ============
+
+  function onCityChange(cityId) {
+    currentCity = cityId;
+    saveCityPref(cityId);
+
+    // Re-render content with new city data
+    renderContent();
+    setupImageObserver();
+    applyFilters();
+
+    // Update hero count
+    if (currentCity !== "all-county") {
+      const recorded = Object.keys(getCityData()).length;
+      document.getElementById("species-count").textContent =
+        `${TOTAL_SPECIES} species countywide · ${recorded} recorded in ${getCityInfo().name}`;
+    } else {
+      document.getElementById("species-count").textContent =
+        `${TOTAL_SPECIES} species across ${FAMILIES.length} families`;
     }
   }
 
@@ -289,9 +385,6 @@
           const activeLink = document.querySelector(`.family-link[data-family="${entry.target.id}"]`);
           if (activeLink) {
             activeLink.classList.add("active");
-            // Scroll the nav pill into view without touching the page scroll.
-            // scrollIntoView can hijack momentum scrolling on macOS/iOS,
-            // so we manually adjust the horizontal scroll of the nav container.
             const navRect = navScroller.getBoundingClientRect();
             const linkRect = activeLink.getBoundingClientRect();
             const offset = linkRect.left - navRect.left - navRect.width / 2 + linkRect.width / 2;
@@ -307,7 +400,6 @@
   // ============ EVENT LISTENERS ============
 
   function setupEvents() {
-    // Search
     const searchInput = document.getElementById("search");
     let debounceTimer;
     searchInput.addEventListener("input", () => {
@@ -318,7 +410,6 @@
       }, 200);
     });
 
-    // Keyboard shortcut for search
     document.addEventListener("keydown", (e) => {
       if (e.key === "/" && document.activeElement !== searchInput) {
         e.preventDefault();
@@ -332,7 +423,6 @@
       }
     });
 
-    // Filter buttons
     document.querySelectorAll(".filter-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
@@ -342,13 +432,16 @@
       });
     });
 
-    // Sticky nav shadow
+    // City selector
+    document.getElementById("city-select").addEventListener("change", (e) => {
+      onCityChange(e.target.value);
+    });
+
     const nav = document.getElementById("sticky-nav");
     window.addEventListener("scroll", () => {
       nav.classList.toggle("scrolled", window.scrollY > 100);
     }, { passive: true });
 
-    // Back to top
     const btt = document.getElementById("back-to-top");
     window.addEventListener("scroll", () => {
       btt.classList.toggle("visible", window.scrollY > 600);
@@ -361,13 +454,22 @@
   // ============ INIT ============
 
   function init() {
-    document.getElementById("species-count").textContent =
-      `${TOTAL_SPECIES} species across ${FAMILIES.length} families`;
+    renderCitySelector();
     renderFamilyLinks();
     renderContent();
     setupImageObserver();
     setupScrollSpy();
     setupEvents();
+
+    // Set initial hero text
+    if (currentCity !== "all-county") {
+      const recorded = Object.keys(getCityData()).length;
+      document.getElementById("species-count").textContent =
+        `${TOTAL_SPECIES} species countywide · ${recorded} recorded in ${getCityInfo().name}`;
+    } else {
+      document.getElementById("species-count").textContent =
+        `${TOTAL_SPECIES} species across ${FAMILIES.length} families`;
+    }
   }
 
   if (document.readyState === "loading") {

@@ -260,6 +260,112 @@ body {
   color: #fff;
 }
 
+/* ============ CITY SELECTOR ============ */
+
+.location-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.location-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--color-primary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.location-wrap select {
+  appearance: none;
+  padding: 0.45rem 2rem 0.45rem 2rem;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%232d6b3f' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.location-wrap select:hover {
+  background-color: #d4ecd9;
+}
+
+.location-wrap select:focus {
+  box-shadow: 0 0 0 3px rgba(45,107,63,0.15);
+}
+
+/* ============ LIKELIHOOD BADGES ============ */
+
+.likelihood-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 100px;
+  z-index: 2;
+  backdrop-filter: blur(6px);
+}
+
+.likelihood-badge.common {
+  background: rgba(45,107,63,0.9);
+  color: #fff;
+}
+
+.likelihood-badge.occasional {
+  background: rgba(196,145,46,0.9);
+  color: #fff;
+}
+
+.likelihood-badge.not-recorded {
+  background: rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.85);
+}
+
+.species-card.dimmed {
+  opacity: 0.5;
+}
+
+.species-card.dimmed:hover {
+  opacity: 0.85;
+}
+
+.city-habitat-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  background: var(--color-primary-light);
+  border: 1px solid rgba(45,107,63,0.15);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.5rem;
+}
+
+.city-habitat-note svg {
+  width: 15px;
+  height: 15px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.city-stats {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
 /* ============ FAMILY NAV ============ */
 
 .family-nav {
