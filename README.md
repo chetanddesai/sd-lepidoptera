@@ -2,7 +2,7 @@
 
 A visual identification guide to the butterflies of San Diego County, California.
 
-**[View the guide](https://cdesai.github.io/sd-lepidoptera/)**
+**[View the guide](https://chetanddesai.github.io/sd-lepidoptera/)**
 
 ## About
 
