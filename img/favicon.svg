@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#2d6b3f"/>
+  <g transform="translate(256,256)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+    <!-- upper wings -->
+    <path d="M0 10c0 0-60-100-120-80s-40 100 0 100 120-20 120-20" stroke-width="10" fill="rgba(255,255,255,0.2)"/>
+    <path d="M0 10c0 0 60-100 120-80s40 100 0 100-120-20-120-20" stroke-width="10" fill="rgba(255,255,255,0.2)"/>
+    <!-- lower wings -->
+    <path d="M0 0c0 0-50 20-80 80s0 100 40 80 40-80 40-80" stroke-width="10" fill="rgba(255,255,255,0.15)"/>
+    <path d="M0 0c0 0 50 20 80 80s0 100-40 80-40-80-40-80" stroke-width="10" fill="rgba(255,255,255,0.15)"/>
+    <!-- body -->
+    <line x1="0" y1="-30" x2="0" y2="100" stroke-width="12"/>
+    <!-- antennae -->
+    <path d="M0-30c-10-20-25-45-40-55" stroke-width="7"/>
+    <path d="M0-30c10-20 25-45 40-55" stroke-width="7"/>
+    <circle cx="-42" cy="-58" r="6" fill="#fff"/>
+    <circle cx="42" cy="-58" r="6" fill="#fff"/>
+  </g>
+</svg>

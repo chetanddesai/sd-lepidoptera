@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Butterflies of San Diego County — Identification Guide</title>
+  <meta name="description" content="A visual identification guide to the butterflies of San Diego County, California. Sourced from the San Diego Natural History Museum checklist.">
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="img/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="img/favicon-16x16.png" sizes="16x16" type="image/png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#2d6b3f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-super">San Diego County, California</p>
+      <h1>Butterflies of<br>San Diego County</h1>
+      <p class="hero-subtitle">A Visual Identification Guide</p>
+      <p class="hero-count" id="species-count"></p>
+    </div>
+    <div class="hero-scroll-hint" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+  </header>
+
+  <nav class="sticky-nav" id="sticky-nav">
+    <div class="nav-inner">
+      <div class="nav-brand">SD Lepidoptera</div>
+      <div class="nav-controls">
+        <div class="search-wrap">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input type="search" id="search" placeholder="Search by name…" autocomplete="off" spellcheck="false">
+          <kbd class="search-kbd">/</kbd>
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="protected">Protected</button>
+          <button class="filter-btn" data-filter="rare">Rare</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <nav class="family-nav" id="family-nav">
+    <div class="family-nav-inner" id="family-links"></div>
+  </nav>
+
+  <main id="main-content"></main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-source">
+        <h3>Source & Citation</h3>
+        <p>
+          Species checklist sourced from the
+          <a href="https://www.sdnhm.org/science/invertebrate-zoology/projects/checklist-of-butterflies-of-san-diego-county/" target="_blank" rel="noopener">
+            Checklist of Butterflies of San Diego County
+          </a>
+          by the San Diego Natural History Museum, prepared by Nature Festivals of San Diego County
+          with professional review by David Faulkner (SDNHM) and Dr. John Brown (Smithsonian Institute).
+        </p>
+        <p class="footer-note">
+          Species images sourced from <a href="https://www.inaturalist.org" target="_blank" rel="noopener">iNaturalist</a>
+          community observations (Creative Commons licensed). Identification descriptions written for field use.
+        </p>
+      </div>
+      <div class="footer-meta">
+        <p>Original checklist revised 9/2002. Identification descriptions added for this guide.</p>
+        <p class="footer-copy">
+          Built as an open educational resource.
+          <a href="https://github.com/cdesai/sd-lepidoptera" target="_blank" rel="noopener">View on GitHub</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
