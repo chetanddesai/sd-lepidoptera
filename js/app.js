@@ -97,7 +97,7 @@
         <div class="card-image-wrap">
           <div class="image-placeholder loading" id="ph-${cardId}">
             ${BUTTERFLY_SVG}
-            <span>Loading</span>
+            <span class="loading-label">Loading photo</span>
           </div>
           <img alt="${sp.commonName} (${sp.scientificName})" data-species="${sp.scientificName}" loading="lazy">
           ${badges.length ? `<div class="card-badges">${badges.join("")}</div>` : ""}
@@ -221,8 +221,9 @@
     const ph = document.getElementById(`ph-${cardId}`);
     if (!ph) return;
     ph.classList.toggle("loading", loading);
-    if (!loading) {
-      ph.querySelector("span").textContent = "No photo available";
+    const label = ph.querySelector(".loading-label");
+    if (label) {
+      label.textContent = loading ? "Loading photo" : "No photo available";
     }
   }
 
