@@ -99,7 +99,7 @@
             ${BUTTERFLY_SVG}
             <span class="loading-label">Loading photo</span>
           </div>
-          <img alt="${sp.commonName} (${sp.scientificName})" data-species="${sp.scientificName}" loading="lazy">
+          <img alt="${sp.commonName} (${sp.scientificName})" data-species="${sp.scientificName}">
           ${badges.length ? `<div class="card-badges">${badges.join("")}</div>` : ""}
         </div>
         <div class="card-body">
@@ -280,6 +280,7 @@
   function setupScrollSpy() {
     const familyLinks = document.querySelectorAll(".family-link");
     const sections = document.querySelectorAll(".family-section");
+    const navScroller = document.getElementById("family-nav");
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -288,7 +289,13 @@
           const activeLink = document.querySelector(`.family-link[data-family="${entry.target.id}"]`);
           if (activeLink) {
             activeLink.classList.add("active");
-            activeLink.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+            // Scroll the nav pill into view without touching the page scroll.
+            // scrollIntoView can hijack momentum scrolling on macOS/iOS,
+            // so we manually adjust the horizontal scroll of the nav container.
+            const navRect = navScroller.getBoundingClientRect();
+            const linkRect = activeLink.getBoundingClientRect();
+            const offset = linkRect.left - navRect.left - navRect.width / 2 + linkRect.width / 2;
+            navScroller.scrollBy({ left: offset, behavior: "smooth" });
           }
         }
       });
