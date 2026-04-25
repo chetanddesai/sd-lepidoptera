@@ -119,8 +119,9 @@
       <div class="city-habitat-note" id="city-note">
         ${ICONS.pin}
         <span>
-          Showing observations for <strong>${info.name}</strong> — ${info.habitat}.
-          <span class="city-stats">${recorded} species</span> recorded by iNaturalist community scientists.
+          Showing <span class="city-stats">${recorded} species</span> recorded in
+          <strong>${info.name}</strong> — ${info.habitat}.
+          Select "All San Diego County" to see the full checklist.
         </span>
       </div>`;
   }
@@ -159,10 +160,9 @@
 
     const likelihood = currentCity !== "all-county" ? getLikelihood(sp.scientificName) : null;
     const obsCount = getObsCount(sp.scientificName);
-    const dimmed = likelihood === "not-recorded" ? " dimmed" : "";
 
     return `
-      <article class="species-card${dimmed}" id="${cardId}"
+      <article class="species-card" id="${cardId}"
         data-common="${sp.commonName.toLowerCase()}"
         data-scientific="${sp.scientificName.toLowerCase()}"
         data-species-name="${sp.scientificName}"
@@ -176,7 +176,7 @@
           </div>
           <img alt="${sp.commonName} (${sp.scientificName})" data-species="${sp.scientificName}">
           ${badges.length ? `<div class="card-badges">${badges.join("")}</div>` : ""}
-          ${likelihood ? `<span class="likelihood-badge ${likelihood}" title="${obsCount} observation${obsCount !== 1 ? "s" : ""} in ${getCityInfo().name}">${getLikelihoodLabel(likelihood)}</span>` : ""}
+          ${likelihood && obsCount > 0 ? `<span class="likelihood-badge ${likelihood}" title="${obsCount} observation${obsCount !== 1 ? "s" : ""} in ${getCityInfo().name}">${getLikelihoodLabel(likelihood)}</span>` : ""}
         </div>
         <div class="card-body">
           <h4>${sp.commonName}</h4>
@@ -307,6 +307,7 @@
   function applyFilters() {
     const cards = document.querySelectorAll(".species-card");
     let visibleCount = 0;
+    const citySelected = currentCity !== "all-county";
 
     cards.forEach(card => {
       const common = card.dataset.common;
@@ -315,12 +316,17 @@
         || common.includes(currentSearch)
         || scientific.includes(currentSearch);
 
+      const isRecorded = card.dataset.likelihood === "common" || card.dataset.likelihood === "occasional";
+
       let matchesFilter = true;
       if (currentFilter === "protected") matchesFilter = card.dataset.protected === "true";
       if (currentFilter === "rare") matchesFilter = card.dataset.rare === "true";
-      if (currentFilter === "recorded") matchesFilter = card.dataset.likelihood === "common" || card.dataset.likelihood === "occasional";
+      if (currentFilter === "recorded") matchesFilter = isRecorded;
 
-      const visible = matchesSearch && matchesFilter;
+      // When a city is selected, hide species not recorded there
+      const matchesCity = !citySelected || isRecorded;
+
+      const visible = matchesSearch && matchesFilter && matchesCity;
       card.classList.toggle("hidden", !visible);
       if (visible) visibleCount++;
     });

@@ -328,19 +328,6 @@ body {
   color: #fff;
 }
 
-.likelihood-badge.not-recorded {
-  background: rgba(0,0,0,0.45);
-  color: rgba(255,255,255,0.85);
-}
-
-.species-card.dimmed {
-  opacity: 0.5;
-}
-
-.species-card.dimmed:hover {
-  opacity: 0.85;
-}
-
 .city-habitat-note {
   display: inline-flex;
   align-items: center;
